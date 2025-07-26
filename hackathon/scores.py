@@ -1,5 +1,6 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from hackathon.db import get_db
+import requests
 
 
 bp = Blueprint("scores", __name__, url_prefix="/scores")
@@ -17,7 +18,7 @@ def index():
     if error:
         return error, 400
     scores = get_scores(game, int(difficulty))
-    return scores
+    return jsonify(scores)
 
 
 @bp.route("/new", methods=("POST",))
@@ -42,8 +43,8 @@ def new():
     new_score = dict(game=game, difficulty=difficulty, name=name, score=score)
     score_saved = save_score(new_score)
     if score_saved:
-        return {"saved": True}
-    return {"saved": False}
+        return jsonify({"saved": True})
+    return jsonify({"saved": False})
 
 
 def get_scores(game, difficulty):
@@ -58,7 +59,7 @@ def get_scores(game, difficulty):
         }
         for score in scores
     ]
-    return scores
+    return jsonify(scores)
 
 
 def save_score(new_score):

@@ -1,3 +1,6 @@
+import { GameWon, GameOver } from "/static/components.js"
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const grid = document.getElementById('minesweeper-grid');
   const playButton = document.getElementById('play-button');
@@ -17,38 +20,42 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById(id).showModal();
   }
 
-  function closeModalById(id){
+  function closeModalById(id) {
     document.getElementById(id).close();
   }
 
-  function openEndModalAsWinner(isWinner)
-  {
+  function openEndModalAsWinner(isWinner) {
     const modal = document.getElementById("end-game-modal");
-    modal.innerHTML = "";
-    let title = "";
-    let body = "";
-    let footer = '<button id="closeEGModal">Close</button>';
-    if (isWinner){
-      title = "CONGRATS! You won!"
-      
-      body = `
-      <label for="winnerName">please enter a name (3 chars max)
-      <input type="text" id="winnerName" maxlength="3" required />
-      </label>
-      `
-    } else {
-      title = "Too bad, you lost!";
-    }
-
-    modal.innerHTML = `
-    <h2>${title}</h2>
-    <p>time in seconds: ${timeElapsed}</p>
-    ${body}
-    ${footer}
-    `
-
     modal.showModal();
-    document.getElementById("closeEGModal").addEventListener("click", () => {modal.close();});
+    if (isWinner) {
+      modal.appendChild(new GameWon(timeElapsed, difficulty));
+    } else {
+      modal.appendChild(new GameOver());
+    }
+//    modal.innerHTML = "";
+//    let title = "";
+//    let body = "";
+//    let footer = '<button id="closeEGModal">Close</button>';
+//    if (isWinner){
+//      title = "CONGRATS! You won!"
+//      
+//      body = `<hs-form></hs-form>
+//      <label for="winnerName">please enter a name (3 chars max)
+//      <input type="text" id="winnerName" maxlength="3" required />
+//      </label>
+//      `
+//    } else {
+//      title = "Too bad, you lost!";
+//    }
+// 
+//     modal.innerHTML = `
+//     <h2>${title}</h2>
+//     <p>time in seconds: ${timeElapsed}</p>
+//     ${body}
+//     ${footer}
+//     `
+
+    //document.getElementById("closeEGModal").addEventListener("click", () => {modal.close();});
   }
 
   document.querySelector("#difficultySelection button").addEventListener('click', () => {
@@ -229,6 +236,19 @@ grid.style.gridTemplateRows = `repeat(${rows}, 40px)`;
       adjustBombCounter(-1);
     }
   }
+
+// ----------------------------------------
+// DELETE THIS HACK
+document.querySelector("body").addEventListener("keydown", (event) => { 
+  if (!isGameRunning) { return;}
+  if (event.code == "KeyW") {
+    stopGame(true)
+  } else if (event.code == "KeyL") {
+    stopGame(false)
+  }
+});
+// ----------------------------------------
+// ------------------------------------------
 
 
   function checkWin() {

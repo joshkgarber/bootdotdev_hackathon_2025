@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-
+{% block head %}
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+{% endblock %}
 {%block title %}Minesweeper{% endblock %}
 
 {% block main %}
@@ -48,6 +50,6 @@
   </div>
 
   <!-- Game Logic -->
-  <script src="{{ url_for('static', filename='minesweeper.js') }}"></script>
+  <script src="{{ url_for('static', filename='minesweeper.js') }}" type="module"></script>
 </div>
 {% endblock %}

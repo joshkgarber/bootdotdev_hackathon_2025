@@ -1,6 +1,12 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, flash
 from hackathon.db import get_db
 import requests
+import os
+
+
+hcap_sitekey = "ce7c55e8-26d2-4b54-a2d6-17acaf588408"
+hcap_secret = os.environ.get("HCAPTCHA_SECRET")
+hcap_verify_url = "https://api.hcaptcha.com/siteverify"
 
 
 bp = Blueprint("scores", __name__, url_prefix="/scores")
@@ -37,14 +43,28 @@ def new():
     name = name.upper()
     if not score.isdigit():
         error = "invalid score"
-    if error:
-        return error, 400
-    score = int(score)
-    new_score = dict(game=game, difficulty=difficulty, name=name, score=score)
-    score_saved = save_score(new_score)
-    if score_saved:
-        return jsonify({"saved": True})
-    return jsonify({"saved": False})
+    hc_token = request.form["h-captcha-response"]
+    if hc_token is None:
+        error = "Captcha token missing"
+    if error is None:
+        data = {
+            "secret": hcap_secret,
+            "response":hc_token,
+            "remoteip": request.remote_addr,
+        }
+        response = requests.post(url=hcap_verify_url, data=data)
+        result = response.json()
+        if not result.get("success"):
+            error = "Captcha failed"
+        if error is None:
+            score = int(score)
+            new_score = dict(game=game, difficulty=difficulty, name=name, score=score)
+            score_saved = save_score(new_score)
+            if score_saved:
+                return jsonify({"saved": True})
+            return jsonify({"saved": False})
+
+    flash(error)
 
 
 def get_scores(game, difficulty):
@@ -59,7 +79,7 @@ def get_scores(game, difficulty):
         }
         for score in scores
     ]
-    return jsonify(scores)
+    return scores
 
 
 def save_score(new_score):

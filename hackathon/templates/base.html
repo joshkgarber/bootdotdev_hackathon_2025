@@ -21,6 +21,7 @@
     {% endwith %}
 	<body>
 		<main>
+            <script src="{{ url_for("static", filename="components.js") }}" type="module"></script>
 			{% block main %}{% endblock %}
 		</main>
 	</body>
